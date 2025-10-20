@@ -1,0 +1,39 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: task-executor-deployment
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: task-executor
+  template:
+    metadata:
+      labels:
+        app: task-executor
+    spec:
+      serviceAccountName: task-executor-sa 
+      containers:
+      - name: task-executor
+        # 🚨 FIX: Must include the repository owner (Docker Hub username)
+        image: abhinavkolamulli/task-executor-backend:latest 
+        ports:
+        - containerPort: 8080
+        resources:
+          requests:
+            memory: "512Mi"
+            cpu: "500m"
+          limits:
+            memory: "1Gi"
+            cpu: "1000m"
+        env:
+        - name: MONGO_HOST
+          value: "mongo-release-mongodb"
+        - name: MONGO_PORT
+          value: "27017"
+        - name: MONGO_DATABASE
+          value: "kaiburr_tasks"
+        - name: KUBERNETES_NAMESPACE
+          valueFrom:
+            fieldRef:
+              fieldPath: metadata.namespace

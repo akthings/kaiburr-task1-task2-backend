@@ -1,0 +1,30 @@
+apiVersion: v1
+kind: ServiceAccount
+metadata:
+  name: task-executor-sa
+  namespace: default # Ensure this matches your deployment namespace
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: pod-creator-role
+  namespace: default # Ensure this matches your deployment namespace
+rules:
+- apiGroups: [""] # "" indicates the core API group
+  # Grant permissions to manage Pods (create, get, list, watch, delete)
+  resources: ["pods", "pods/log"]
+  verbs: ["create", "get", "watch", "list", "delete"]
+---
+apiVersion: rbac.authorization.k8s.io/v1
+kind: RoleBinding
+metadata:
+  name: task-executor-binding
+  namespace: default # Ensure this matches your deployment namespace
+subjects:
+- kind: ServiceAccount
+  name: task-executor-sa
+  namespace: default # Ensure this matches your deployment namespace
+roleRef:
+  kind: Role
+  name: pod-creator-role
+  apiGroup: rbac.authorization.k8s.io
